@@ -1,0 +1,143 @@
+class Node:
+  def __init__(self, data):
+    self.data = data  #self is like the Node box
+    self.next = None
+    self.prev = None
+
+class DoublyLinkedList:
+  def __init__(self):
+    self.head = None
+
+  def is_empty(self):
+    cur = self.head
+    if cur is None:
+      return True
+    else:
+      return False
+    
+  def add(self, item):
+    new_node = Node(item)  #creates the new node
+    if self.head is None:
+      self.head = new_node   #adds the node to empty list
+      return True
+    cur = self.head 
+    previous = None  #starting off in the very beginning
+    while cur and cur.data < item:   #found proper location
+      previous = cur    # keeps track of the recent old node by calling it 'previous'
+      cur = cur.next   #iterates thru the loop
+    if cur and cur.data ==item:   #item already exits
+      return False
+    new_node.next = cur  #establishing 'next' connection with existing element
+    new_node.prev = previous  #establishing 'prev' connection with existing element
+    if previous: #solidify connection with new node
+      previous.next = new_node 
+    else:  # make new node the head (since there is no 'prev')
+      self.head = new_node
+    if cur:  
+      cur.prev = new_node
+    return True
+      
+
+  def remove(self, item):
+    cur = self.head
+    while cur:
+      #cases where we need to get rid of the first node
+      if cur.data == item and cur == self.head:
+        if not cur.next:   #case 1: if there is only one node
+          cur = None
+          self.head = None
+          return True
+        else: #case 2: we want to rid of head node but there's linked node
+          nxt = cur.next   # B
+          cur.next = None  #killing the connection to B
+          nxt.prev = None  #killing the connection of B to A
+          cur = None        #killing the Node altogether
+          self.head = nxt   #made B the head now
+          return True
+      #cases where we need to get rid of node in the rest of the list
+      elif cur.data == item:
+        if cur.next:  #if the node has connections before and after it
+          nxt = cur.next
+          previous = cur.prev
+          previous.next = nxt #redirecting connection by skipping over cur 
+          nxt.prev = previous #redirecting the 'previous' connection
+          cur.next = None  #killing the connection of cur
+          cur.prev = None  #killing the connection of cur
+          cur = None      # killing the node altogether
+          return True
+
+        else: # if the node is at the end
+          previous = cur.prev
+          previous.next = None #skipping over cur
+          cur.prev = None   #killing 'prev' connection
+          cur = None   #killing the node altogether
+          return True    
+      cur = cur.next    #make sure to iterate thru all elements 
+    return False
+    
+  def index(self, item):
+    cur = self.head
+    idx = 0   #starts at the front
+    while cur:
+      if cur.data == item:
+        return idx
+      cur = cur.next   # moves to the next element
+      idx += 1   #keeps track of increasing index
+    return None   #'None' when gone thru every element with no item found  
+    
+  def pop(self, index):
+    if index < 0 or index >= self.size():
+        raise IndexError("Index must be within list size.")  #gives the proper error
+    if index == 0:
+        if not self.head.next:  #checks if there is only one element in list
+            key = self.head.data
+            self.head = None  #kills the only node in list
+            return key
+        else:
+            nxt = self.head.next
+            key = self.head.data
+            self.remove(key)
+            self.head = nxt  #the head hancho changes to the following element
+            return key
+    cur = self.head
+    position = 0
+    while cur and position < index:
+        cur = cur.next  #moves on to the next element
+        position += 1
+    key = cur.data
+    self.remove(key)   #calls remove function made earlier
+    return key
+    
+  def search(self, item):
+    return self.search_helper(self.head, item)
+    
+  def search_helper(self, node, key):
+    if node is None:
+      return False
+    if node.data == key:
+      return True
+    return self.search_helper(node.next, key)  #recursion
+    
+  def python_list(self):
+    list = []   #starting the list
+    cur = self.head  #start at the very beginning at head
+    while cur:
+      list.append(cur.data)  #adds to the empty list
+      cur = cur.next   #moves to the next element
+    return list
+    
+  def python_list_reversed(self):
+    return self.python_list_reversed_helper(self.head) 
+  def python_list_reversed_helper(self,node):
+    if node is None:
+      return []
+    rest = self.python_list_reversed_helper(node.next)   #recursion
+    return [node.data] + rest
+    
+  def size(self):
+    return self.size_helper(self.head)  #recursion
+  def size_helper(self, node):
+    if node is None:
+      return 0
+    return 1 + self.size_helper(node.next)  #recursion
+    
